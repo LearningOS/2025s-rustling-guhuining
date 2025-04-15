@@ -2,7 +2,6 @@
 	heap
 	This question requires you to implement a binary heap function
 */
-// I AM NOT DONE
 
 use std::cmp::Ord;
 use std::default::Default;
@@ -37,7 +36,21 @@ where
     }
 
     pub fn add(&mut self, value: T) {
-        //TODO
+        self.items.push(value);
+        self.count += 1;
+
+        // 向上调整，维持堆的性质
+        let mut idx = self.count;
+        while idx > 1 {
+            let parent_idx = self.parent_idx(idx);
+            if (self.comparator)(&self.items[idx], &self.items[parent_idx]) {
+                // 如果子节点与父节点的关系满足比较器条件，则交换它们
+                self.items.swap(idx, parent_idx);
+                idx = parent_idx;
+            } else {
+                break;
+            }
+        }
     }
 
     fn parent_idx(&self, idx: usize) -> usize {
@@ -57,8 +70,15 @@ where
     }
 
     fn smallest_child_idx(&self, idx: usize) -> usize {
-        //TODO
-		0
+        let left_child_idx = self.left_child_idx(idx);
+        let right_child_idx = self.right_child_idx(idx);
+        if right_child_idx > self.count {
+            return left_child_idx;
+        } else if (self.comparator)(&self.items[left_child_idx], &self.items[right_child_idx]) {
+            return left_child_idx;
+        } else {
+            return right_child_idx;
+        }
     }
 }
 
@@ -84,8 +104,34 @@ where
     type Item = T;
 
     fn next(&mut self) -> Option<T> {
-        //TODO
-		None
+        if self.count == 0 {
+            return None;
+        }
+
+        self.items.swap(1, self.count);
+        let result = self.items.pop();
+        self.count -= 1;
+
+        // 如果堆变为空，直接返回
+        if self.count == 0 {
+            return result;
+        }
+
+        // 从顶部开始向下调整堆
+        let mut current_idx = 1;
+        while self.children_present(current_idx) {
+            let smallest_child = self.smallest_child_idx(current_idx);
+
+            if (self.comparator)(&self.items[smallest_child], &self.items[current_idx]) {
+                // 如果子节点与当前节点的关系满足比较器条件，则交换它们
+                self.items.swap(smallest_child, current_idx);
+                current_idx = smallest_child;
+            } else {
+                break;
+            }
+        }
+
+        result
     }
 }
 
